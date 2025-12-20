@@ -1,0 +1,81 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
+<html>
+<head>
+<META http-equiv=Content-Type content="text/html; charset=UTF-8">
+<title>Exported from Notepad++</title>
+<style type="text/css">
+span {
+	font-family: 'Consolas';
+	font-size: 12pt;
+	color: #F0F0F0;
+}
+.sc0 {
+}
+.sc2 {
+	color: #57A64A;
+}
+.sc4 {
+	color: #A6CEA8;
+}
+.sc5 {
+	color: #E67DDC;
+}
+.sc6 {
+	color: #D69D85;
+}
+.sc9 {
+	color: #9B9B9B;
+}
+.sc10 {
+	color: #9B9B9B;
+}
+.sc11 {
+	color: #F1F2F3;
+}
+.sc16 {
+	color: #559CD6;
+}
+</style>
+</head>
+<body>
+<div style="float: left; white-space: pre; line-height: 1; background: #1E1E1E; "><span class="sc9">#include &lt;iostream&gt;
+#include &lt;SDL2/SDL.h&gt;
+</span><span class="sc0">
+</span><span class="sc9">#include "../src/WindowManager_class.hpp"
+</span><span class="sc0">
+</span><span class="sc2">// function main
+</span><span class="sc16">int</span><span class="sc0"> </span><span class="sc11">main</span><span class="sc0"> </span><span class="sc10">(</span><span class="sc16">int</span><span class="sc0"> </span><span class="sc11">argc</span><span class="sc10">,</span><span class="sc0"> </span><span class="sc16">char</span><span class="sc10">**</span><span class="sc0"> </span><span class="sc11">argv</span><span class="sc10">)</span><span class="sc0"> </span><span class="sc10">{</span><span class="sc0">
+  </span><span class="sc5">if</span><span class="sc0"> </span><span class="sc10">(</span><span class="sc11">SDL_Init</span><span class="sc0"> </span><span class="sc10">(</span><span class="sc11">SDL_INIT_VIDEO</span><span class="sc10">)</span><span class="sc0"> </span><span class="sc10">&lt;</span><span class="sc0"> </span><span class="sc4">0</span><span class="sc10">)</span><span class="sc0"> </span><span class="sc10">{</span><span class="sc0">
+    </span><span class="sc11">std</span><span class="sc10">::</span><span class="sc11">cerr</span><span class="sc0"> </span><span class="sc10">&lt;&lt;</span><span class="sc0"> </span><span class="sc6">"SDL_Init() : "</span><span class="sc0"> </span><span class="sc10">&lt;&lt;</span><span class="sc0"> </span><span class="sc11">SDL_GetError</span><span class="sc0"> </span><span class="sc10">()</span><span class="sc0"> </span><span class="sc10">&lt;&lt;</span><span class="sc0"> </span><span class="sc11">std</span><span class="sc10">::</span><span class="sc11">endl</span><span class="sc10">;</span><span class="sc0">
+    </span><span class="sc5">return</span><span class="sc0"> </span><span class="sc10">-</span><span class="sc4">1</span><span class="sc10">;</span><span class="sc0">
+  </span><span class="sc10">}</span><span class="sc0"> </span><span class="sc5">else</span><span class="sc0"> </span><span class="sc10">{</span><span class="sc0">
+    </span><span class="sc11">std</span><span class="sc10">::</span><span class="sc11">cout</span><span class="sc0"> </span><span class="sc10">&lt;&lt;</span><span class="sc0"> </span><span class="sc6">"SDL Initialized"</span><span class="sc0"> </span><span class="sc10">&lt;&lt;</span><span class="sc0"> </span><span class="sc11">std</span><span class="sc10">::</span><span class="sc11">endl</span><span class="sc10">;</span><span class="sc0">
+  </span><span class="sc10">}</span><span class="sc0">
+  
+  </span><span class="sc11">WindowManager</span><span class="sc10">*</span><span class="sc0"> </span><span class="sc11">window1</span><span class="sc0"> </span><span class="sc10">=</span><span class="sc0"> </span><span class="sc5">new</span><span class="sc0"> </span><span class="sc11">WindowManager</span><span class="sc10">;</span><span class="sc0">
+  
+  </span><span class="sc11">window1</span><span class="sc0"> </span><span class="sc10">-&gt;</span><span class="sc0"> </span><span class="sc11">set_window_title</span><span class="sc0"> </span><span class="sc10">(</span><span class="sc6">"For Website"</span><span class="sc10">);</span><span class="sc0">
+  </span><span class="sc11">window1</span><span class="sc0"> </span><span class="sc10">-&gt;</span><span class="sc0"> </span><span class="sc11">set_width</span><span class="sc0"> </span><span class="sc10">(</span><span class="sc4">480</span><span class="sc10">);</span><span class="sc0">
+  </span><span class="sc11">window1</span><span class="sc0"> </span><span class="sc10">-&gt;</span><span class="sc0"> </span><span class="sc11">set_height</span><span class="sc0"> </span><span class="sc10">(</span><span class="sc4">640</span><span class="sc10">);</span><span class="sc0">
+  
+  </span><span class="sc5">if</span><span class="sc0"> </span><span class="sc10">(!</span><span class="sc11">window1</span><span class="sc0"> </span><span class="sc10">-&gt;</span><span class="sc0"> </span><span class="sc11">create_window_renderer</span><span class="sc10">())</span><span class="sc0"> </span><span class="sc10">{</span><span class="sc0">
+    </span><span class="sc11">std</span><span class="sc10">::</span><span class="sc11">cerr</span><span class="sc0"> </span><span class="sc10">&lt;&lt;</span><span class="sc0"> </span><span class="sc6">"Could not create window renderer "</span><span class="sc0"> </span><span class="sc10">&lt;&lt;</span><span class="sc0"> </span><span class="sc11">std</span><span class="sc10">::</span><span class="sc11">endl</span><span class="sc10">;</span><span class="sc0">
+    </span><span class="sc5">return</span><span class="sc0"> </span><span class="sc10">-</span><span class="sc4">1</span><span class="sc10">;</span><span class="sc0">
+  </span><span class="sc10">}</span><span class="sc0">
+  
+  </span><span class="sc11">SDL_SetRenderDrawColor</span><span class="sc0"> </span><span class="sc10">(</span><span class="sc11">window1</span><span class="sc0"> </span><span class="sc10">-&gt;</span><span class="sc0"> </span><span class="sc11">renderer</span><span class="sc10">,</span><span class="sc0"> </span><span class="sc4">255</span><span class="sc10">,</span><span class="sc0"> </span><span class="sc4">255</span><span class="sc10">,</span><span class="sc0"> </span><span class="sc4">255</span><span class="sc10">,</span><span class="sc0"> </span><span class="sc4">255</span><span class="sc10">);</span><span class="sc0">
+  </span><span class="sc11">SDL_RenderClear</span><span class="sc0"> </span><span class="sc10">(</span><span class="sc11">window1</span><span class="sc0"> </span><span class="sc10">-&gt;</span><span class="sc0"> </span><span class="sc11">renderer</span><span class="sc10">);</span><span class="sc0">
+  
+  </span><span class="sc11">SDL_RenderPresent</span><span class="sc0"> </span><span class="sc10">(</span><span class="sc11">window1</span><span class="sc0"> </span><span class="sc10">-&gt;</span><span class="sc0"> </span><span class="sc11">renderer</span><span class="sc10">);</span><span class="sc0">
+  
+  </span><span class="sc11">SDL_Delay</span><span class="sc0"> </span><span class="sc10">(</span><span class="sc4">5000</span><span class="sc10">);</span><span class="sc0">
+  
+  
+  
+  </span><span class="sc5">delete</span><span class="sc0"> </span><span class="sc11">window1</span><span class="sc10">;</span><span class="sc0">
+  
+  </span><span class="sc11">SDL_Quit</span><span class="sc0"> </span><span class="sc10">();</span><span class="sc0">
+  
+  </span><span class="sc5">return</span><span class="sc0"> </span><span class="sc4">0</span><span class="sc10">;</span><span class="sc0">
+</span><span class="sc10">}</span></div></body>
+</html>
