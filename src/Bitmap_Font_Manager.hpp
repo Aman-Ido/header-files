@@ -1,259 +1,297 @@
-// class bitmap_font
+/* 
+  this is a c++ bitmap font class and methods related to that program
+*/
+
+// other functions
+int m_abs (int value) {
+  if (value > 0) {
+    return value;
+  }
+  return -1 * value;
+}
+
+// m_update_cursor (source_x, source_y, desti_x, desti_y, cur_x = index (i), cur_y = index (i) <vertical>)
+void m_update_cursor (int* src_x, int* src_y, int* dest_x, int* dest_y, int cur_x, int cur_y, char s_value) {
+  *src_x = s_value % 16;
+  *src_y = s_value / 16;
+  
+}
+
+// main bitmap font class
 class Bitmap_Font {
   public:
-    SDL_Texture* l_texture;
-    int width;
-    int height; // height and width of the texture
-    bool is_full;
-    
-    // these are the default values
-    int row = 16;
-    int col = 16;
-    int font_size = 12;
-    int col_switch = 0;
-    int row_switch = 0;
-    
-    
-    // constructor
-    Bitmap_Font ();
-    
-    // destructor
-    ~Bitmap_Font ();
-    
-    // calling for free texture
-    void free_image ();
+    // about the image
+    SDL_Texture* image; // default NULL
+    int width; // default 0
+    int height; // default 0 
     
     /* 
-      method to load image -> bitmap image, width and height are automatically handled 
+      so that we can adjust the size of the text (without relying on image)
     */
-    bool load_image (SDL_Renderer* i_renderer, std::string path);
+    int zoom; // default 0
+    
+    int font_size; // default 2
+    
+    SDL_Color font_color = {0};
+    
+    int c_font_size;
+    
+    SDL_Point sw_point; // switch point, x is for horizontal and y is for vertical (for render advanced)
     
     /* 
-      method to update format from 16x16 to 16x6
-      just input "half" for 16x6
-      and anything else (std::string) for 16x16
+      values for coordination
     */
-    void update_format (std::string i_input);
+    SDL_Rect src = {0}; // for source
+    SDL_Rect dest = {0}; // for destination
     
     /* 
-      method to set up the font size
+      Bitmap_Font - methods
     */
-    void set_font_size (int i_font_size);
     
     /* 
-      method to get row
+      structures
     */
-    int get_row (char i_value);
+    Bitmap_Font (); // sets the values
+    ~Bitmap_Font (); // calls free method
     
     /* 
-      method to get col these functions are not necessary for ordinary user
+      method to free the loaded image and set the values to their default
     */
-    int get_col (char i_value);
+    void free_bitmap ();
     
     /* 
-      method to render text - normal
+      method to load the image
     */
-    void render_text (SDL_Renderer* i_renderer, int x, int y, std::string i_text);
+    bool load_bitmap (SDL_Renderer* i_renderer, std::string file_path );
     
     /* 
-      method to render the font but advanced
+      method to render the image as per the inputted string
     */
-    void render_text_advanced (SDL_Renderer* i_renderer, int x, int y, std::string i_text, bool i_animation);
+    void render_bitmap (SDL_Renderer* i_renderer, std::string message, int pos_x, int pos_y);
+    
+    /* 
+      method to render the image as per the inputted string, but can also read \n and \r and 
+      render as per their meaning
+    */
+    void render_bitmap_advanced (SDL_Renderer* i_renderer, std::string message, int pos_x, int pos_y, int window_width);
     
     /* 
       method to change the color
     */
-    void change_color (int r, int g, int b);
+    void color_bitmap (int r, int g, int b);
+    
+    /* 
+      method to change the zoom (increase the font size)
+    */
+    void zoom_bitmap (int value);
+    
+    
+    
     
 };
 
-
 /* 
-  method to change the color
+  constructor
 */
-void Bitmap_Font::change_color (int r, int g, int b) {
-  // std::cout << "\t\t * Bitmap_Font::change_color (int, int, int) " << std::endl;
-  // std::cout << "\t\t\t -> User should use 'white' or 'grey' image for best results" << std::endl;
-  if (this -> l_texture != nullptr) {
-    SDL_SetTextureColorMod (this -> l_texture, r, g, b);
-  }
-}
-
-/*
-  void render_text_advanced (SDL_Renderer* i_renderer, int x, int y, std::string i_text, bool i_animation)
-  , meaning it will read things like \r \n and put the text acccordingly
-  meaning if I type function\r\nfoo, the output will be
+Bitmap_Font::Bitmap_Font () {
+  this -> image = nullptr;
+  this -> width = 0;
+  this -> height = 0;
   
-  --------------
-  function
-  foo
-  --------------
+  this -> zoom = 0;
+  this -> font_size = 2;
   
-  Also I would like to add rotation function as well as animation to it. but they are in their development stage right now
-  
-*/
-void Bitmap_Font::render_text_advanced (SDL_Renderer* i_renderer, int x, int y, std::string i_text, bool i_animation) {
-  // only rendering
-  
-  
-  /* 
-    looping through text
-  */
-  for (int i = 0 ; i < i_text.length (); i++) {
-    
-    // source rect cutting
-    SDL_Rect src_rect = {get_col(i_text[i]), get_row(i_text[i]), this -> font_size, this -> font_size}; // cuts out from the source file
-    
-    // destination rect
-    SDL_Rect dest_rect = {0};
-    
-    /* 
-      to check for special character 
-    */
-    if (i_text[i] == '\n') {
-      this -> col_switch ++;
-      if (i_text[i - 1] == '\r') {
-        this -> row_switch = -1;
-      } 
-    } 
-    if (i_text[i] == '\r') {
-      this -> row_switch = 0;  
-    } 
-    
-    /* 
-      fill up destination rect
-    */
-    dest_rect.x = x + (this -> row_switch * this -> font_size); // 10
-    dest_rect.y = y + (this -> font_size * this -> col_switch); // 10
-    dest_rect.w = this -> font_size;
-    dest_rect.h = this -> font_size;
-    
-  
-    // rendering - in future we will probably use SDL_RenderCopyEx
-    SDL_RenderCopy (i_renderer, this -> l_texture, &src_rect, &dest_rect);
-    this -> row_switch ++;
-    
-    // this if for animation - just put false for now
-    if (i_animation) {
-      SDL_RenderPresent (i_renderer);
-      SDL_Delay (50);
-    }
-  }
-  
-  // resetting 
-  this -> row_switch = 0;
-  this -> col_switch = 0;
+  this -> c_font_size = 0;
 }
 
 /* 
-  update the format - to update the format from half (16 x 6 ) or full (16 x 16) 
-  * super necessary 
+  destructor
 */
-void Bitmap_Font::update_format (std::string i_input) {
-  std::cout << "\t * Bitmap_Font::update_format (std::string )" << std::endl;
-  if (i_input == "half") {
-    this -> is_full = false;
-    std::cout << "\t\t * Format updated : HALF" << std::endl;
-  } else {
-    this -> is_full = true;
-    std::cout << "\t\t * Format updated : FULL" << std::endl;
-  }
-}
-
-// sets the font size 
-void Bitmap_Font::set_font_size (int i_font_size) {
-  std::cout << "\t * Bitmap_Font::set_font_size (int )" << std::endl;
-  if (i_font_size > 0) {
-    this -> font_size = i_font_size;
-    std::cout << "\t\t * Font Size : " << this -> font_size << std::endl;
-  }
-}
-
-// methods to get the coordination for row and column -> source image / rect
-int Bitmap_Font::get_row (char i_value) {
-  if (this -> is_full) {
-    
-    return floor (i_value / this -> row) * this -> font_size;
-  } else {
-    return (floor (i_value / this -> row) - 2) * this -> font_size;
-  }
-}
-
-int Bitmap_Font::get_col (char i_value) {
-  return (i_value % this -> col) * this -> font_size;
+Bitmap_Font::~Bitmap_Font () {
+  free_bitmap ();
 }
 
 /* 
-  render text - function to render the text on the screen 
-  it is void and does not print anything on console
+  method - void free_bitmap (void);
+      - destroyes the textures and sets the variable to nullptr
+      - reverts the values to their defaults
 */
-void Bitmap_Font::render_text (SDL_Renderer* i_renderer, int x, int y, std::string i_text) {
-  // only rendering
-  
-  // looping through the inputted string
-  for (int i = 0 ; i < i_text.length (); i++) {
+void Bitmap_Font::free_bitmap () {
+  if (this -> image != nullptr) {
+    SDL_DestroyTexture (this -> image);
+    this -> image = nullptr;
     
-    SDL_Rect src_rect = {get_col(i_text[i]), get_row(i_text[i]), this -> font_size, this -> font_size}; // cuts out from the source file
-    /* 
-      setting destination rect 
-      Note: if you want to zoom in or zoom out on the text just add values to the width and height section of this
-      like
-      dest_rect.w = this -> font_size + 1; // for magnification (you can do more than 1)
-      dest_rect.h = this -> font_size - 1; // for zoom out 
-    */
-    SDL_Rect dest_rect = {x + (i * this -> font_size), y, this -> font_size, this -> font_size};
+    this -> width = 0;
+    this -> height = 0;
     
-    // just rendering
-    SDL_RenderCopy (i_renderer, this -> l_texture, &src_rect, &dest_rect);
+    this -> font_size = 2;
+    this -> zoom = 0;
+    
+    this -> font_color.r = 0;
+    this -> font_color.g = 0;
+    this -> font_color.b = 0;
+    this -> font_color.a = 0;
+    
+    this -> dest.x = 0;
+    this -> dest.y = 0;
+    this -> dest.w = 0;
+    this -> dest.h = 0;
+    
+    this -> c_font_size = 0;
+    
+    this -> src.x = 0;
+    this -> src.y = 0;
+    this -> src.w = 0;
+    this -> src.h = 0;
   }
 }
 
 /* 
-  loading the image -> to load the bitmap image 
-  (but you can load any image makes great design patterns) 
-  return true - success / false - failure
+  method - bool load_bitmap (SDL_Renderer*, std::string file_path);
+      - calls free_bitmap () method
+      - loads the image as texture
+      - sets the width and height value (image's width and height )
+      - sets the font_size (image's width / 16)
+      
+      - returns 'true' on success, 'false' on errors
 */
-bool Bitmap_Font::load_image (SDL_Renderer* i_renderer, std::string path) {
-  std::cout << "\t * Bitmap_Font::load_image (SDL_Renderer* , std::string )" << std::endl;
-  free_image (); // if there were any texture from before
+bool Bitmap_Font::load_bitmap (SDL_Renderer* i_renderer, std::string file_path ) {
+  free_bitmap (); // removing previously loaded image
   
-  // loading the image as a texture (Must have SDL_image installed and initialized)
-  this -> l_texture = IMG_LoadTexture (i_renderer, path.c_str());
-  if (this -> l_texture == nullptr) { // error checking
-    std::cerr << "\t\t * IMG_LoadTexture () : " << IMG_GetError () << std::endl;
+  // loading the image texture
+  this -> image = IMG_LoadTexture (i_renderer, file_path.c_str());
+  
+  // error checking
+  if (this -> image == nullptr) {
+    std::cout << "\t ! Bitmap_Font::load_bitmap () -> image_loading, failed\n\t\t- " << IMG_GetError () << std::endl;
     return false;
   } else {
-    std::cout << "\t\t * Image Loaded as Texture : " << path << std::endl;
+    std::cout << "\t * Bitmap_Font::load_bitmap () -> image_loading, success\n" << std::endl;
   }
   
-  // querying about the texture to get its width and height
-  SDL_QueryTexture (this -> l_texture, nullptr, nullptr, &this -> width, &this -> height);
+  // querying the image
+  SDL_QueryTexture (this -> image, nullptr, nullptr, &this -> width, &this -> height);
   
-  // returning true if everything is good
+  // setting the font size 
+  this -> font_size = this -> width / 16;
+  
+  // setting width / height of src
+  this -> src.w = this -> font_size;
+  this -> src.h = this -> font_size;
+  
+  this -> dest.w = m_abs(this -> font_size + this -> zoom);
+  this -> dest.h = m_abs(this -> font_size + this -> zoom);
+  
+  this -> c_font_size = this -> font_size;
+  
+  
   return true;
 }
 
-// method to free previously loaded texture image
-void Bitmap_Font::free_image () {
-  if (this -> l_texture != nullptr ) {
-    SDL_DestroyTexture (this -> l_texture);
-    this -> l_texture = nullptr;
-    this -> width = 0;
-    this -> height = 0;
-    this -> is_full = false;
+/* 
+  method - void color_bitmap (int r, int g, int b);
+      - this method will only set the values to the SDL Color
+*/
+void Bitmap_Font::color_bitmap (int r, int g, int b) {
+  /* 
+    there probably needs to be a value checking before assigning, but later on that 
+  */
+  
+  this -> font_color.r = m_abs (r);
+  this -> font_color.g = m_abs (g);
+  this -> font_color.b = m_abs (b);
+}
+
+/* 
+  method - void render_bitmap (SDL_Renderer* i_renderer, std::string message)
+*/
+void Bitmap_Font::render_bitmap (SDL_Renderer* i_renderer, std::string message, int pos_x, int pos_y) {
+  // setting render color
+  SDL_SetTextureColorMod (this -> image, this -> font_color.r, this -> font_color.g, this -> font_color.b);
+  
+  int string_length = static_cast <int> (message.length());
+  
+  for (int i = 0; i < string_length; i++) {
+    // calculating
+    this -> src.x = message[i] % 16 * this -> font_size;
+    this -> src.y = message[i] / 16 * this -> font_size;
+    
+    this -> dest.x = pos_x + (i * this -> c_font_size);
+    this -> dest.y = pos_y;
+    
+    // rendering
+    SDL_RenderCopy (i_renderer, this -> image, &this -> src, &this -> dest);
   }
+  
+  
+  
 }
 
-// constructor
-Bitmap_Font::Bitmap_Font () {
-  this -> l_texture = nullptr;
-  this -> width = 0;
-  this -> height = 0;
-  this -> is_full = false; // is_full -> true = 16x16 complete ascii 
-  // is_full -> false = 16x8 only the necessary ones 
+/* 
+  method - zoom_bitmap (int value)
+      - this method will only set the value for this -> zoom, and this -> c_font_size (change font size)
+      - will also update destination width and height
+*/
+void Bitmap_Font::zoom_bitmap (int value) {
+  this -> zoom = value;
+  
+  this -> c_font_size = m_abs (this -> font_size + this -> zoom);
+  
+  this -> dest.w = this -> c_font_size;
+  this -> dest.h = this -> c_font_size;
 }
 
-// destructor
-Bitmap_Font::~Bitmap_Font () {
-  free_image ();
+/* 
+  method - render_bitmap_advanced (SDL_Renderer*, std::string, int, int);
+      - sets the color for the text from this -> font_color
+      - starts looping the message for characters
+      - calculates source positions
+      - calcuates the destination positions as per the this -> sw_point (switch point)
+      - can read \n \r and if the text is out of Window Width  and render (e.g. inputted_text = "Hello\nWorld!")
+                -- Will output --
+                * Hello
+                * World!
+*/
+void Bitmap_Font::render_bitmap_advanced (SDL_Renderer* i_renderer, std::string message, int pos_x, int pos_y, int window_width) {
+  // changing the color
+  SDL_SetTextureColorMod (this -> image, this -> font_color.r, this -> font_color.g, this -> font_color.b);
+  
+  // looping
+  int string_size = static_cast <int> (message.length());
+  
+  for (int i = 0; i < string_size; i++) {
+    // updating positions 
+    this -> src.x = (message[i] % 16) * this -> font_size;
+    this -> src.y = (message[i] / 16) * this -> font_size;
+    
+    // calculating the sw_point (switch point)
+    /* 
+      we will change the y coordinate as per these values \n, \r, for now
+    */
+    
+    if ( (this -> dest.x + this -> dest.w) > window_width ) {
+      this -> sw_point.y += 1;
+      this -> sw_point.x = 0;
+    }
+    
+    if (message[i] == '\r') {
+      
+      this -> sw_point.x = 0;
+    }
+    if (message[i] == '\n') {
+      this -> sw_point.y += 1;
+      this -> sw_point.x = -1;
+    }
+    
+    this -> dest.x = pos_x + (this -> sw_point.x * this -> c_font_size);
+    this -> dest.y = pos_y + (this -> sw_point.y * this -> c_font_size);
+    
+    // rendering
+    SDL_RenderCopy (i_renderer, this -> image, &this -> src, &this -> dest);
+    
+    // updating switch x
+    this -> sw_point.x += 1;
+  }
+  this -> sw_point.y = 0;
+  this -> sw_point.x = 0;
 }
