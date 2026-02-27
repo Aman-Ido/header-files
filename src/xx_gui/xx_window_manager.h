@@ -14,11 +14,11 @@ typedef struct {
   int width;
   int height;
   
-  char window_title [20] ;
+  char window_title [30] ;
 } xx_window_manager;
 
 // function - declarations
-int xx_create_window_renderer (xx_window_manager* i_window);
+xx_window_manager* xx_create_window_renderer (int width, int height, char* window_title);
 void xx_destroy_window_renderer (xx_window_manager* i_window);
 
 
@@ -29,18 +29,29 @@ void xx_destroy_window_renderer (xx_window_manager* i_window);
   function - create_window_renderer
     - to create window and renderer (basic)
 */
-int xx_create_window_renderer (xx_window_manager* i_window) {
+xx_window_manager* xx_create_window_renderer (int width, int height, char* window_title) {
   
-  if (i_window -> window_title[0] == '\0') {
+  xx_window_manager* i_window = (xx_window_manager*) malloc (sizeof(xx_window_manager) * 1);
+  if (i_window == NULL) {
+    printf ("\t ! Memory allocation, failed, xx_window_manager* i_window\n");
+    return NULL;
+  }
+
+  if (window_title[0] == '\0') {
     printf ("\t ! Please, fill in window_title, setting it 'default' \n");
     char lt [] = "de_fault";
     xx_strcpy (i_window -> window_title, lt);
+  } else {
+    xx_strcpy (i_window -> window_title, window_title);
   }
   
   if (i_window -> width <= 0 || i_window -> height <= 0) {
     printf ("\t ! Please, set the values of width and height\nsetting it to default 640x480\n");
     i_window -> width = 640;
     i_window -> height = 480;
+  } else {
+    i_window -> width = width;
+    i_window -> height = height;
   }
   
   // creating window and renderer
@@ -48,7 +59,7 @@ int xx_create_window_renderer (xx_window_manager* i_window) {
       SDL_WINDOWPOS_UNDEFINED, i_window -> width, i_window -> height, SDL_WINDOW_SHOWN);
   if (i_window -> window == NULL) {
     printf ("\t ! SDL_CreateWindow () -> Error, %s\n", SDL_GetError());
-    return 0;
+    return NULL;
   } else {
     printf ("\t * SDL_CreateWindow () -> Success\n");
   }
@@ -57,12 +68,12 @@ int xx_create_window_renderer (xx_window_manager* i_window) {
   i_window -> renderer = SDL_CreateRenderer (i_window -> window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
   if (i_window -> renderer == NULL) {
     printf ("\t ! SDL_CreateRenderer () -> Error, %s\n", SDL_GetError());
-    return 0;
+    return NULL;
   } else {
     printf ("\t * SDL_CreateRenderer () -> Success\n");
   }
   
-  return 1;
+  return i_window;
 };
 
 /* 
@@ -79,4 +90,7 @@ void xx_destroy_window_renderer (xx_window_manager* i_window) {
     SDL_DestroyWindow (i_window -> window);
     i_window -> window = NULL;
   }
+
+  free (i_window);
+  i_window = NULL;
 }

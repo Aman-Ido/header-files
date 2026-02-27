@@ -9,25 +9,25 @@
 
 
 typedef struct {
-  SDL_Texture* map = NULL; // texture to store the bitmap font image
+  SDL_Texture* map; // texture to store the bitmap font image
   
-  SDL_Rect src = {0}; // cursors - source
-  SDL_Rect dest = {0}; // cursor - destination
+  SDL_Rect src; // cursors - source
+  SDL_Rect dest; // cursor - destination
   
-  int font_size = 0; /* stores the info about font_size*/
+  int font_size; /* stores the info about font_size*/
   
-  int zoom = 0; /* 
+  int zoom; /* 
     to show the rendered text bigger or smaller
     kind of like setting font_size
   */
-  int z_chang = 0;
+  int z_chang;
   /* 
     Stores the zoom change values
     so that I don't have to calculate it everytime (only needed when the zoom is in negative, like -82)
   */
   
-  int cur_x = 0; // cursor for destination rendering - pointers_x
-  int cur_y = 0; // cursor for destination rendering - pointers_y
+  int cur_x; // cursor for destination rendering - pointers_x
+  int cur_y; // cursor for destination rendering - pointers_y
   /* 
     in future there will probably be a function using which you can just type in newline text
     like if you input "my name is \nsomething haha";
@@ -39,8 +39,11 @@ typedef struct {
     ----------------
   */
   
-  int width = 0; // get the width of the loaded image
-  int height = 0; // get the height of the loaded image
+  int width; // get the width of the loaded image
+  int height; // get the height of the loaded image
+              //
+  int total_width;
+  int total_height;
   
   // char file_size [30]; // string to store the the filename - currently not in use
   
@@ -48,13 +51,15 @@ typedef struct {
 
 
 // function declarations
+bm_mgr* bm_create (); // it ain't mandatory to do this, but it will fill in the default values
 int bm_load (SDL_Renderer* i_renderer, bm_mgr* i_bm, char* file_path); // loads image
 void bm_free (bm_mgr* i_bm); // frees those image
 void bm_render (SDL_Renderer* i_renderer, bm_mgr* i_bm, char* i_string, int x, int y); // renders the font
-void bm_render_input (SDL_Renderer* i_renderer, bm_mgr* i_bm, char* i_string, int x, int y, int cur_x); // renders the font - or for custom display
-/* void bm_render_advanced (SDL_Renderer* i_renderer, bm_mgr* i_bm, char* i_string, int x, int y, int window_width); // renders font (advanced) */
+void bm_render_advanced (SDL_Renderer* i_renderer, bm_mgr* i_bm, char* i_string, int x, int y, int window_width); // renders font (advanced)
 void bm_set_color (bm_mgr* i_bm, int r, int g, int b); // sets the color
 void bm_set_zoom (bm_mgr* i_bm, int zoom); // sets the zoom
+int bm_get_total_width ( bm_mgr* i_bm );
+int bm_get_total_height ( bm_mgr* i_bm );
 
 
 /* 
@@ -77,7 +82,11 @@ void bm_update_cursor (bm_mgr* i_bm, char i_value, int x, int y, int cur_x, int 
     - And Updates Zoom_Change (z_chang) (Automatically) Struct -> z_chang
 */
 int bm_load (SDL_Renderer* i_renderer, bm_mgr* i_bm, char* file_path) {
-  bm_free (i_bm); // freeing old image
+  // bm_free (i_bm); // freeing old image
+  if ( i_bm -> map != NULL ) {
+    SDL_DestroyTexture ( i_bm -> map );
+    i_bm -> map = NULL;
+  }
   
   i_bm -> map = IMG_LoadTexture (i_renderer, file_path); // loading the image
   // error checking
@@ -125,6 +134,9 @@ void bm_free (bm_mgr* i_bm) {
     SDL_DestroyTexture (i_bm -> map);
     i_bm -> map = NULL;
   }
+
+  free ( i_bm );
+  i_bm = NULL;
 }
 
 /* 
@@ -135,7 +147,8 @@ void bm_free (bm_mgr* i_bm) {
 void bm_render (SDL_Renderer* i_renderer, bm_mgr* i_bm, char* i_string, int x, int y) {
   int t_ss = xx_strlen (i_string); // gets the length of the string
   
-  
+  i_bm -> total_width = t_ss * i_bm -> z_chang;
+  i_bm -> total_height = i_bm -> z_chang;
   
   
   for (int i = 0; i < t_ss; i++) {
@@ -202,28 +215,81 @@ void bm_set_zoom (bm_mgr* i_bm, int zoom) {
         - this function will do everything that bm_render does
         - adding to that, can read \n \r and if the text is out of bounds
 */
-/* void bm_render_advanced (SDL_Renderer* i_renderer, bm_mgr* i_bm, char* i_string, int x, int y, int window_width) {
+void bm_render_advanced (SDL_Renderer* i_renderer, bm_mgr* i_bm, char* i_string, int x, int y, int window_width) {
   int string_size = xx_strlen (i_string);
   
+
   for (int i = 0; i < string_size; i++) {
-    i_bm -> src.x = i_string[i] % 16;
-    i_bm -> src.y = i_string[i] / 16;
+    i_bm -> src.x = i_string[i] % 16 * i_bm -> font_size;
+    i_bm -> src.y = i_string[i] / 16 * i_bm -> font_size;
     
-    i_bm -> dest.x = 
-    
+    i_bm -> dest.x = x + (i_bm -> z_chang * i_bm -> cur_x);
+    i_bm -> dest.y = y + (i_bm -> z_chang * i_bm -> cur_y);
+
+    i_bm -> cur_x += 1;
+    if (i_string [i] == '\n') {
+      i_bm -> total_width = i_bm -> cur_x * i_bm -> z_chang;
+      i_bm -> cur_x = 0;
+      i_bm -> total_height = (i_bm -> cur_y + 1) * i_bm -> z_chang;
+      i_bm -> cur_y += 1;
+      
+    }
+    if (i_string [i] == '\r') {
+      i_bm -> cur_x = 0;
+    }
+
+    SDL_RenderCopy (i_renderer, i_bm -> map, &i_bm -> src, &i_bm -> dest);
     
   }
-} */
+  i_bm -> cur_x = 0;
+  i_bm -> cur_y = 0;
+}
 
 
 
 /* 
-  function - void bm_render_input (SDL_Renderer* i_renderer, bm_mgr* i_bm, char* i_string, int x, int y, int cur_x);
-       - this function will render from cur_x only
-       - like if cur_x == 6, and i_string = "hello world!",
-                                             0123456789
-                                             it will only show 'world!'
-*/
-void bm_render_input (SDL_Renderer* i_renderer, bm_mgr* i_bm, char* i_string, int x, int y, int cur_x) {
-  printf ("No second note I don't think I need this \n");
+ * function - bm_mgr* bm_create ();
+ *    - function to create a dynamic bm_mgr and then return (the ownership it to the caller)
+ *    - isn't mandatory to call, but is recommended as it will fill in defaults
+ * */
+bm_mgr* bm_create () {
+  bm_mgr* r_value = (bm_mgr*) malloc (sizeof(bm_mgr) * 1);
+  if (r_value == NULL) {
+    printf ("\t ! Could not allocate memory -> bm_mgr*\n");
+    return NULL;
+  }
+
+
+  r_value -> map = NULL;
+
+  r_value -> zoom = 0;
+
+  r_value -> cur_x = 0;
+  r_value -> cur_y = 0;
+
+  r_value -> dest.x = 0;
+  r_value -> dest.y = 0;
+  r_value -> dest.w = 0;
+  r_value -> dest.h = 0;
+  
+  r_value -> src.x = 0;
+  r_value -> src.y = 0;
+  r_value -> src.w = 0;
+  r_value -> src.h = 0;
+
+  r_value -> font_size = 0;
+  r_value -> z_chang = 0;
+
+  r_value -> width = 0;
+  r_value -> height = 0;
+
+  return r_value;
+}
+
+int bm_get_total_width ( bm_mgr* i_bm ) {
+  return i_bm -> total_width;
+}
+
+int bm_get_total_height ( bm_mgr* i_bm ) {
+  return i_bm -> total_height;
 }
