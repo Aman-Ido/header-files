@@ -23,7 +23,7 @@ int main ( int argc, char** argv ) {
   xx_window_manager* window1 = xx_create_window_renderer (640, 480, (char*) "Testing xx_slider");
   bm_mgr* font1 = bm_create ();
   bm_set_zoom ( font1, -10 );
-  bm_load ( window1 -> renderer, font1, (char*) "font1.png" );
+  bm_load ( window1 -> renderer, font1, (char*) "../font1.png" );
 
   xx_slider* slider1 = xx_create_slider ( 200, 50, 300, 10, 10, 340, 50  );
 

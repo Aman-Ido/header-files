@@ -58,8 +58,8 @@ void bm_render (SDL_Renderer* i_renderer, bm_mgr* i_bm, char* i_string, int x, i
 void bm_render_advanced (SDL_Renderer* i_renderer, bm_mgr* i_bm, char* i_string, int x, int y, int window_width); // renders font (advanced)
 void bm_set_color (bm_mgr* i_bm, int r, int g, int b); // sets the color
 void bm_set_zoom (bm_mgr* i_bm, int zoom); // sets the zoom
-int bm_get_total_width ( bm_mgr* i_bm );
-int bm_get_total_height ( bm_mgr* i_bm );
+int bm_get_total_width ( bm_mgr* i_bm, char* string );
+int bm_get_total_height ( bm_mgr* i_bm, char* string );// this function does not work with bm_render_advanced right now
 
 
 /* 
@@ -147,8 +147,8 @@ void bm_free (bm_mgr* i_bm) {
 void bm_render (SDL_Renderer* i_renderer, bm_mgr* i_bm, char* i_string, int x, int y) {
   int t_ss = xx_strlen (i_string); // gets the length of the string
   
-  i_bm -> total_width = t_ss * i_bm -> z_chang;
-  i_bm -> total_height = i_bm -> z_chang;
+  //i_bm -> total_width = t_ss * i_bm -> z_chang;
+  //i_bm -> total_height = i_bm -> z_chang;
   
   
   for (int i = 0; i < t_ss; i++) {
@@ -223,10 +223,20 @@ void bm_render_advanced (SDL_Renderer* i_renderer, bm_mgr* i_bm, char* i_string,
     i_bm -> src.x = i_string[i] % 16 * i_bm -> font_size;
     i_bm -> src.y = i_string[i] / 16 * i_bm -> font_size;
     
+    if ( i_string [i] == '\t' ) {
+      i_bm -> cur_x += 4; // tab space
+    }
     i_bm -> dest.x = x + (i_bm -> z_chang * i_bm -> cur_x);
+
     i_bm -> dest.y = y + (i_bm -> z_chang * i_bm -> cur_y);
 
     i_bm -> cur_x += 1;
+    // checking if the x is out of width 
+    if ( i_bm -> dest.x + i_bm -> z_chang > window_width ) {
+      i_bm -> cur_y += 1;
+      i_bm -> cur_x = 0;
+    }
+
     if (i_string [i] == '\n') {
       i_bm -> total_width = i_bm -> cur_x * i_bm -> z_chang;
       i_bm -> cur_x = 0;
@@ -237,7 +247,6 @@ void bm_render_advanced (SDL_Renderer* i_renderer, bm_mgr* i_bm, char* i_string,
     if (i_string [i] == '\r') {
       i_bm -> cur_x = 0;
     }
-
     SDL_RenderCopy (i_renderer, i_bm -> map, &i_bm -> src, &i_bm -> dest);
     
   }
@@ -286,10 +295,13 @@ bm_mgr* bm_create () {
   return r_value;
 }
 
-int bm_get_total_width ( bm_mgr* i_bm ) {
+int bm_get_total_width ( bm_mgr* i_bm, char* string ) {
+  i_bm -> total_width = strlen (string) * i_bm -> z_chang;
   return i_bm -> total_width;
 }
 
-int bm_get_total_height ( bm_mgr* i_bm ) {
+// this function does not work with bm_render_advanced for now
+int bm_get_total_height ( bm_mgr* i_bm, char* string ) {
+  i_bm -> total_height = i_bm -> z_chang;
   return i_bm -> total_height;
 }

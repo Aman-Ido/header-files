@@ -22,6 +22,11 @@ typedef struct {
 
   int selected_value; // I don't really need this. (default - (-1)); // meaning nothing has been selected 
   int n; // cursor (default - 0;)
+
+  int font_size;
+
+  int current_max_string; // to store the current longest string size
+  int previous_max_string; // to store the previous longest string size
 } xx_radio_button;
 
 /* 
@@ -43,8 +48,8 @@ void xx_free_radio_button ( xx_radio_button* i_radio ); // will free everything 
 int xx_get_radio_button_int ( xx_radio_button* i_radio ); // will only return the index which is selected
 char* xx_get_radio_button_string ( xx_radio_button* i_radio ); // will return a dynamically allocated char* memory
 void xx_free_radio_button_string ( char* i_string ); // this must be called if /\\ is called
-int xx_get_radio_button_total_width ( xx_radio_button* i_radio, bm_mgr* i_font );
-int xx_get_radio_button_total_height ( xx_radio_button* i_radio, bm_mgr* i_font );
+int xx_get_radio_button_total_width ( xx_radio_button* i_radio );
+int xx_get_radio_button_total_height ( xx_radio_button* i_radio );
 
 /* 
  * function - definitions
@@ -74,6 +79,9 @@ xx_radio_button* xx_create_radio_button ( bm_mgr* i_font, int i_max_number, int 
     r_radio_button -> max_number = i_max_number;
   }
 
+  r_radio_button -> font_size = i_font -> z_chang;
+  r_radio_button -> current_max_string = 0;
+  r_radio_button -> previous_max_string = 0;
 
   // setting up the default value to the string_size
   if ( i_max_string_size < 0 ) {
@@ -171,6 +179,11 @@ void xx_add_radio_button ( xx_radio_button* i_radio, char* i_string ) {
 
   xx_add_list ( i_radio -> string_list, i_string );
 
+  if ( xx_strlen (i_string) > i_radio -> current_max_string) {
+    i_radio -> previous_max_string = i_radio -> current_max_string;
+    i_radio -> current_max_string = xx_strlen (i_string);
+  }
+
   i_radio -> n += 1;
 
 }
@@ -186,6 +199,8 @@ void xx_remove_radio_button ( xx_radio_button* i_radio ) {
   if ( i_radio -> n == i_radio -> selected_value ) {
     i_radio -> selected_value = -1;
   }
+
+  i_radio -> current_max_string = i_radio -> previous_max_string;
 
   i_radio -> n -= 1;
 }
@@ -268,10 +283,10 @@ void xx_free_radio_button_string ( char* i_string ) {
 /* 
  * function - getters
  * */
-int xx_get_radio_button_total_width ( xx_radio_button* i_radio, bm_mgr* i_font ) {
-  return i_radio -> outer_box -> w + ( i_font -> z_chang * i_radio -> max_string_size );
+int xx_get_radio_button_total_width ( xx_radio_button* i_radio ) {
+  return i_radio -> outer_box -> w + ( i_radio -> font_size * i_radio -> current_max_string );
 }
 
-int xx_get_radio_button_total_height ( xx_radio_button* i_radio, bm_mgr* i_font ) {
-  return i_radio -> outer_box -> h + ( i_font -> z_chang * i_radio -> max_number );
+int xx_get_radio_button_total_height ( xx_radio_button* i_radio ) {
+  return i_radio -> outer_box -> h + ( i_radio -> font_size * i_radio -> n );
 }

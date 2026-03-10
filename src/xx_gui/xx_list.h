@@ -157,7 +157,7 @@ void xx_remove_list ( xx_list* i_list ) {
  * */
 void xx_print_list ( xx_list* i_list) {
   for (int i = 0; i < i_list -> n; i++) {
-    printf ("%d -> %s", i, i_list -> string_array[i]);
+    printf ("%d -> %s\n", i, i_list -> string_array[i]);
   }
 }
 

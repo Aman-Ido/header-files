@@ -19,6 +19,11 @@ typedef struct {
   int sel_num; // number of elements selected
 
   int* integer_list; // will store the index of the information 
+
+  int font_size;
+
+  int current_max_string;
+  int previous_max_string;
 } xx_check_box;
 
 /* 
@@ -41,6 +46,8 @@ void xx_free_string_check_box ( char** i_string, int size );
 int* xx_get_integer_check_box ( xx_check_box* i_check_box );
 int xx_get_check_box_selected_number ( xx_check_box* i_check_box );
 
+int xx_get_check_box_total_width ( xx_check_box* i_check_box );
+int xx_get_check_box_total_height ( xx_check_box* i_check_box );
 
 
 /* 
@@ -69,6 +76,10 @@ xx_check_box* xx_create_check_box ( bm_mgr* i_font, int i_max_number, int i_max_
   } else {
     r_check_box -> max_number = i_max_number;
   }
+
+  r_check_box -> font_size = i_font -> z_chang;
+  r_check_box -> current_max_string = 0;
+  r_check_box -> previous_max_string = 0;
 
   if (i_max_string_size < 0) {
     if (i_max_string_size == -1) {
@@ -193,6 +204,11 @@ void xx_add_check_box_element ( xx_check_box* i_check_box, char* i_string ) {
   // i_check_box -> list_box [ i_check_box -> n ] = 
   i_check_box -> integer_list [ i_check_box -> n ] = 0; // meaning false - not chosen
   
+  int l_string_size = xx_strlen ( i_string );
+  if ( l_string_size > i_check_box -> current_max_string ) {
+    i_check_box -> previous_max_string = i_check_box -> current_max_string;
+    i_check_box -> current_max_string = l_string_size;
+  }
   i_check_box -> n += 1;
 }
 
@@ -202,6 +218,9 @@ void xx_add_check_box_element ( xx_check_box* i_check_box, char* i_string ) {
  * */
 void xx_remove_check_box_element ( xx_check_box* i_check_box ) {
   xx_remove_list ( i_check_box -> string_list );
+
+  i_check_box -> current_max_string = i_check_box -> previous_max_string;
+
   i_check_box -> n -= 1;
   i_check_box -> integer_list [ i_check_box -> n] = -1; // meaning it is not initialized
 }
@@ -306,4 +325,13 @@ int* xx_get_integer_check_box ( xx_check_box* i_check_box  ) {
  * */
 int xx_get_check_box_selected_number ( xx_check_box* i_check_box ) {
   return i_check_box -> sel_num;
+}
+
+
+int xx_get_check_box_total_width ( xx_check_box* i_check_box ) {
+  return i_check_box -> list_box[0].w + (i_check_box -> current_max_string * i_check_box -> font_size) + 4; // (2 + 2) // padding
+}
+
+int xx_get_check_box_total_height ( xx_check_box* i_check_box ) {
+  return (i_check_box -> list_box[0].h * i_check_box -> n) + 4; // (2 + 2) - padding
 }

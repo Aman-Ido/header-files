@@ -37,6 +37,9 @@ xx_window_manager* xx_create_window_renderer (int width, int height, char* windo
     return NULL;
   }
 
+  i_window -> width = 0;
+  i_window -> height = 0;
+
   if (window_title[0] == '\0') {
     printf ("\t ! Please, fill in window_title, setting it 'default' \n");
     char lt [] = "de_fault";
@@ -45,7 +48,7 @@ xx_window_manager* xx_create_window_renderer (int width, int height, char* windo
     xx_strcpy (i_window -> window_title, window_title);
   }
   
-  if (i_window -> width <= 0 || i_window -> height <= 0) {
+  if ( width <= 0 ||  height <= 0) {
     printf ("\t ! Please, set the values of width and height\nsetting it to default 640x480\n");
     i_window -> width = 640;
     i_window -> height = 480;

@@ -43,6 +43,8 @@ void xx_update_loading_bar ( xx_loading* i_loading, float i_data );
 
 void xx_render_loading_bar ( SDL_Renderer* i_renderer, xx_loading* i_loading, float x, float y );
 
+int xx_get_loading_total_width ( xx_loading* i_loading );
+int xx_get_loading_total_height ( xx_loading* i_loading );
 
 /* 
  * function - definitinos
@@ -242,4 +244,21 @@ void xx_update_loading_bar ( xx_loading* i_loading, float i_data ) {
   if ( i_loading -> max_value < i_loading -> change_value ) {
     i_loading -> is_full = 1;
   }
+}
+
+/*
+ * function - int xx_get_loading_total_width ( xx_loading* i_loading );
+ *    -- returns the total width of the loading bar
+ */
+int xx_get_loading_total_width ( xx_loading* i_loading ) {
+  return (int) i_loading -> max_size -> w;
+}
+
+/*
+ * function - int xx_get_loading_total_height ( xx_loading* i_loading );
+ *    -- returns the total height of the loading bar
+ */
+
+int xx_get_loading_total_height ( xx_loading* i_loading ) {
+  return (int) i_loading -> max_size -> h;
 }
