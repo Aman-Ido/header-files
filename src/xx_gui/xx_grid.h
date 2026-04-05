@@ -25,10 +25,7 @@ typedef struct {
 // the main struct which we are going  to use 
 typedef struct {
   int unit_n; // just like item n ( is the cursor )
-  int max_unit_n; // this will the just row's total number of rows that can be used
-  int each_col; // how much column a row can handle
-  int max_element; // this will the real number of elements
-  int row_cursor;
+  int max_unit_n; // this is for the max number of elements ( for the max number of elements )
 
   xx_grid_row_info* row_info; // for storing row information
   xx_grid_unit_info* unit_info; // for storing unit information 
@@ -38,13 +35,14 @@ typedef struct {
   int XX_SCREEN_WIDTH; // for storing screen width and height
   int XX_SCREEN_HEIGHT;
 
-  // placeholder for slider ( xx_bar )
+  int total_elements; // this will indicate the number of total elements that can be stored, not just the same number as the row number or size
+  // placeholder for slider
 } xx_grid;
 
 /* 
  * funciton - declarations
  * */
-xx_grid* xx_create_grid ( int screen_width, int screen_height, int total_number_of_units, int col_n ); // creating the xx_grid pointer nad returns it
+xx_grid* xx_create_grid ( int screen_width, int screen_height, int total_number_of_units, size_t all_units ); // creating the xx_grid pointer nad returns it
 int xx_add_to_grid ( xx_grid* i_grid, size_t row, size_t width, size_t height ); // adds an element to the grid
 void xx_free_grid ( xx_grid* i_grid ); // frees everything of the grid (not tested yet)
 int xx_get_x ( xx_grid* i_grid, int n ); // this one returns the 'x' coordinate
@@ -55,14 +53,15 @@ void xx_show_row_info_grid_n ( xx_grid* i_grid, int n ); // show information of 
 void xx_show_unit_info_grid_n ( xx_grid* i_grid, int n ); // show information of a particular unit (cursor)
 void xx_print_grid_info ( xx_grid* i_grid ); // show information of everything in side of the xx_grid
 
-// function to draw dots or lines (grid) (does not require xx_grid struct)
-void xx_draw_grid_dots (SDL_Renderer* i_renderer, size_t max_width, size_t max_height, size_t scale);
-void xx_draw_grid_lines (SDL_Renderer* i_renderer, size_t max_width, size_t max_height, size_t scale);
+// functions to get 
+int xx_get_total_number_of_grid ( xx_grid* i_grid ); // this will return the number of grids
+int xx_get_total_number_of_elements ( xx_grid* i_grid ); // this will return the total number of units or elements 
+int xx_get_current_number_of_elements ( xx_grid* i_grid ); // this will return the current cursor or index of elements
 
 /* 
  * funciton - definitions
  * */
-xx_grid* xx_create_grid ( int screen_width, int screen_height, int total_number_of_units, int col_n ) {
+xx_grid* xx_create_grid ( int screen_width, int screen_height, int total_number_of_units, size_t all_units ) {
 
   // allocating memory to xx_grid
   xx_grid* r_grid = (xx_grid*) malloc (sizeof(xx_grid) * 1);
@@ -75,7 +74,7 @@ xx_grid* xx_create_grid ( int screen_width, int screen_height, int total_number_
   r_grid -> padding = NULL;
   r_grid -> unit_info = NULL;
   r_grid -> row_info = NULL;
-  r_grid -> row_cursor = 0;
+  r_grid -> total_elements = 0;
 
   // checking if the max number of units is less than 0, if yes we will convert it to positive number
   if ( total_number_of_units < 0 ) {
@@ -85,13 +84,7 @@ xx_grid* xx_create_grid ( int screen_width, int screen_height, int total_number_
     r_grid -> max_unit_n = total_number_of_units;
   }
 
-  if ( col_n < 0 ) {
-    col_n *= -1;
-  } else {
-    r_grid -> each_col = col_n;
-  }
-
-  r_grid -> max_element = r_grid -> each_col * r_grid -> max_unit_n;
+  r_grid -> total_elements = all_units;
 
   r_grid -> unit_n = 0; // the cursor
   r_grid -> XX_SCREEN_WIDTH = screen_width;
@@ -109,7 +102,7 @@ xx_grid* xx_create_grid ( int screen_width, int screen_height, int total_number_
 
   // allocating memory to the structs as per the max user input
   // TODO: here we allocate the same number of units as same number of row, which is in sufficient, thus in future I will make another arguments just for this
-  r_grid -> unit_info = (xx_grid_unit_info*) calloc (r_grid -> max_element, sizeof(xx_grid_unit_info));
+  r_grid -> unit_info = (xx_grid_unit_info*) calloc (r_grid -> total_elements, sizeof(xx_grid_unit_info));
   if ( r_grid -> unit_info == NULL ) {
     printf ("\t Error! Memory Allocation, Failed, xx_grid* r_grid -> xx_grid_unit_info* unit_info\n ");
     return NULL;
@@ -124,7 +117,7 @@ xx_grid* xx_create_grid ( int screen_width, int screen_height, int total_number_
 
   // filling in values for row 
   for ( int i = 0; i < r_grid -> max_unit_n; i++ ) {
-    r_grid -> row_info [i].store_index = (int*) calloc (r_grid -> max_element, sizeof(int));
+    r_grid -> row_info [i].store_index = (int*) calloc (r_grid -> total_elements, sizeof(int));
     if ( r_grid -> row_info [i].store_index == NULL) {
       printf ("\t Error! Memory Allocation, Failed, xx_grid* r_grid -> xx_grid_row_info* row_info -> int* store_index\n");
     }
@@ -140,11 +133,6 @@ xx_grid* xx_create_grid ( int screen_width, int screen_height, int total_number_
  * */
 int xx_add_to_grid ( xx_grid* i_grid, size_t row, size_t width, size_t height ) {
 
-  if ( row > 0 ) {
-    if ( i_grid -> row_cursor < row ) {
-      i_grid -> row_cursor = row;
-    }
-  }
   if ( i_grid -> row_info [row].elements == 0 ) {
     // now updating the real unit's data 
     i_grid -> unit_info [i_grid -> unit_n].x = i_grid -> padding [0];
@@ -225,7 +213,7 @@ void xx_free_grid ( xx_grid* i_grid ) {
     free ( i_grid -> padding );
     i_grid -> padding = NULL;
 
-    for (int i = 0; i < i_grid -> max_unit_n ; i++) {
+    for (int i = 0; i < i_grid -> max_unit_n; i++) {
       free ( i_grid -> row_info [i].store_index );
       i_grid -> row_info [i].store_index = NULL;
     }
@@ -266,7 +254,7 @@ int xx_get_y ( xx_grid* i_grid, int n ) {
 void xx_print_grid_info ( xx_grid* i_grid ) {
   printf ("***** Main Information *****\n");
   printf ("\t ** Infomation - Units **\n");
-  printf ("\t Units : %d/%d (Max)\n", i_grid -> unit_n, i_grid -> max_unit_n);
+  printf ("\t Units : %d/%d (Max)\n", i_grid -> unit_n, i_grid -> total_elements );
   printf ("\t\t (id)\t-\tx\ty\tw\th\tro\tco\t\n");
   for (int i = 0; i < i_grid -> unit_n; i++) {
     printf ("\t\t (%d)\t-\t%d\t%d\t%d\t%d\t%d\t%d\t\n", 
@@ -282,9 +270,9 @@ void xx_print_grid_info ( xx_grid* i_grid ) {
   printf ("\n\n");
   //printing out information about row 
   printf ("\t ** Information - Row **\n");
-  for (int i = 0; i < i_grid -> row_cursor + 1; i++) {
+  for (int i = 0; i < i_grid -> max_unit_n; i++) {
     printf ("\t Row - %d\n", i);
-    printf ("\t Units : %d/%d (Max)\n", i_grid -> row_info [i].elements, i_grid -> max_element);
+    printf ("\t Units : %d/%d (Max)\n", i_grid -> row_info [i].elements, i_grid -> total_elements);
     printf ("\t Current X (pixels) : %d\n", i_grid -> row_info[i].curr_x);
     printf ("\t Max Height of This row (pixels) : %d\n", i_grid -> row_info[i].curr_height);
     printf ("\t Index : ");
@@ -296,57 +284,36 @@ void xx_print_grid_info ( xx_grid* i_grid ) {
 
   printf ("\n\n");
   printf ("\t ** Information - Grid System **\n");
-  printf ("\t Size of Grid : %d\n", sizeof(xx_grid));
+  printf ("\t Size of Grid (The Grid) : %d\n", sizeof(xx_grid));
   int result = 0;
-  result += sizeof(xx_grid) + i_grid -> max_unit_n * sizeof(xx_grid_row_info) + ( (i_grid -> max_element )* sizeof(xx_grid_unit_info) 
-      + (sizeof(int) * i_grid -> max_element) * i_grid -> max_unit_n
-      );
+
+  // this result = 
+  /* 
+   * 0 -> sizeof xx_grid struct 
+   * 1 -> size of xx_grid_row_info times the number of row 
+   * 2 -> size of xx_grid_unit_info times the number of elements 
+   * 3 -> size of integer (4) times the number of elements times the number of row (because each row has this array, and every array is allocated to the number of elements)
+   * TODO: number 3 is inefficient because it takes up alot of memory even when not in use, Please update it
+   * */
+  result = sizeof(xx_grid) + i_grid -> max_unit_n * sizeof(xx_grid_row_info) + ( i_grid -> total_elements * sizeof(xx_grid_unit_info) ) + (( i_grid -> total_elements * sizeof(int) ) * i_grid -> max_unit_n);
   printf ("\t Size of This Grid : %ld\n", result);
   printf ("\t Padding (Horizontal, Vertical) - (%d, %d)\n", i_grid -> padding[0], i_grid -> padding[1]);
   printf ("\t Stored (Screen_Width, Screen_Height) - (%d, %d)\n", i_grid -> XX_SCREEN_WIDTH, i_grid -> XX_SCREEN_HEIGHT);
   printf ("\t **** \n");
 }
 
-/* 
-  function - void xx_draw_grid_lines (SDL_Renderer*, size_t, size_t, size_t)
-      - it will draw lines for grids (in red color);
-*/
-void xx_draw_grid_lines (SDL_Renderer* i_renderer, size_t max_width, size_t max_height, size_t scale) {
-  /*
-    temp references
-  */
-  const int n_x = max_width / scale;
-  const int n_y = max_height / scale;
-  
-  SDL_SetRenderDrawColor (i_renderer, 255, 0, 0, 255);
-  
-  for (int i = 0; i < n_x; i++) {
-    SDL_RenderDrawLine (i_renderer, i * scale, 0, i * scale, max_height);
-  }
-  
-  for (int j = 0; j < n_y; j++) {
-    SDL_RenderDrawLine (i_renderer, 0, j * scale, max_width, j * scale);
-  }
+/*
+ * some getters function 
+ * */
+
+int xx_get_total_number_of_elements ( xx_grid* i_grid ) {
+  return i_grid -> total_elements;
 }
 
+int xx_get_total_number_of_grid ( xx_grid* i_grid ) {
+  return i_grid -> max_unit_n;
+}
 
-/* 
-  function - void xx_draw_grid_dots (SDL_Renderer*, size_t, size_t, size_t);
-      - it will draw points on the screen (in red color)
-*/
-void xx_draw_grid_dots (SDL_Renderer* i_renderer, size_t max_width, size_t max_height, size_t scale) {
-  /* 
-    temp references
-  */
-  const int n_x = max_width / scale;
-  const int n_y = max_height / scale;
-  
-  SDL_SetRenderDrawColor (i_renderer, 255, 0, 0, 255);
-  
-  for (int i = 0; i < n_x; i++) {
-    for (int j = 0; j < n_y; j++) {
-      SDL_RenderDrawPoint (i_renderer, i * scale, j * scale);
-    } 
-  }
-  
+int xx_get_current_number_of_elements ( xx_grid* i_grid ) {
+  return i_grid -> unit_n;
 }
