@@ -22,12 +22,35 @@ typedef struct {
 /* 
  * function - declarations
  * */
+// this functoin will create the animation struct and return xx_animation_frame* 
+// arguments - sdl_renderer*, image path, 
+// per_w is the image's total width - set to -1, calculates automatically only if there is one row of sprite
+// per_h is the image's total height - set to -1, calculates automatically only if there is one row of sprite
+// n_w -> compulsory, number of sprites on a row -> 
+// n_h -> compulsory, number of sprites on a colmn \|/ 
 xx_animation_frame* xx_create_animation_frame ( SDL_Renderer* i_renderer, char* img_path, int per_w, int per_h, int n_w, int n_h );
+
+// frees the animation frame
 void xx_free_animation_frame ( xx_animation_frame* i_frame );
 
-void xx_change_animation_sprite ( xx_animation_frame* i_frame, int value );
-void xx_render_animation_frame ( SDL_Renderer* i_renderer, xx_animation_frame* i_frame, int x, int y );
+void xx_change_animation_sprite ( xx_animation_frame* i_frame, int value ); // change row of animation, from row 0 (idle sprite) to row 1 (running sprite)
 
+/* 
+ * this function will render the animation or the image (with animation)
+ * arguments
+ * sdl_rendere*, xx_animation_frame*
+ * x, y - rendering coordinates
+ * w, h - destination size, if I want 300:300 single sprite to be shown a bit small on animation use 100:100
+ * */
+void xx_render_animation_frame ( SDL_Renderer* i_renderer, xx_animation_frame* i_frame, int x, int y, int w, int h ); 
+
+/* 
+ * this function will have faster speed on low number and slower speed on high number. 
+ * for e.g. -> if you enter 
+ * xx_animation_frame* anime = xx_create_animation_frame (...);
+ * xx_set_animation_frame ( anime, 2 ); // this will be faster
+ * xx_set_animation_frame ( anime, 20 ); // this will be slower
+ * */
 void xx_set_animation_speed ( xx_animation_frame* i_frame, int value ); // changes the speed of the animation
 /* 
  * function - definitions
@@ -142,16 +165,21 @@ void xx_free_animation_frame ( xx_animation_frame* i_frame ) {
 }
 
 /* 
- * function - void xx_render_animation_frame ( SDL_Renderer* i_renderer, xx_animation_frame* i_frame, int x, int y );
+ * function - void xx_render_animation_frame ( SDL_Renderer* i_renderer, xx_animation_frame* i_frame, int x, int y, int w, int h );
  *    -- this function will render the texture (animated one) to that particular x and y coordination 
+ *    -- update, these width and height or w / h at the end are for destination scaling
  * */
-void xx_render_animation_frame ( SDL_Renderer* i_renderer, xx_animation_frame* i_frame, int x, int y ) {
+void xx_render_animation_frame ( SDL_Renderer* i_renderer, xx_animation_frame* i_frame, int x, int y, int w, int h ) {
   i_frame -> box [1] -> x = x;
   i_frame -> box [1] -> y = y;
 
+  i_frame -> box [1] -> w = w;
+  i_frame -> box [1] -> h = h;
+
+
   i_frame -> box [0] -> x = i_frame -> box [0] -> w * i_frame -> cursor -> x; 
   i_frame -> box [0] -> y = i_frame -> box [0] -> h * i_frame -> cursor -> y;
-  
+
 
   // rendering 
   SDL_RenderCopy ( i_renderer, i_frame -> image_texture, i_frame -> box [0], i_frame -> box [1] );
