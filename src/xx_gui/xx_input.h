@@ -440,10 +440,13 @@ int xx_listen_input (SDL_Renderer* i_renderer, xx_input* i_input, bm_mgr* i_font
   if (e.type == SDL_KEYDOWN) {
     switch (e.key.keysym.sym) {
       case SDLK_BACKSPACE:
-        if (xx_strlen (i_input -> user_input) > 0) {
-          
-          xx_pop_back (i_input -> user_input);
-          xx_pop_back (i_input -> pass_input);
+        if ( i_input -> is_active ) {
+          if (xx_strlen (i_input -> user_input) > 0) {
+            
+            xx_pop_back (i_input -> user_input);
+            xx_pop_back (i_input -> pass_input);
+          }
+
         }
         break;
       case SDLK_RETURN:

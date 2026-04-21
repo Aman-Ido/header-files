@@ -31,7 +31,7 @@ void xx_free_bar ( xx_bar* i_bar );
 int xx_listen_bar ( xx_bar* i_bar, SDL_Event i_event );
 void xx_render_bar ( SDL_Renderer* i_renderer, xx_bar* i_bar );
 void xx_set_bar ( xx_bar* i_bar, float x, float y );// just updates the coordinates of the bar
-void xx_calculate_bar  ( xx_bar* i_bar, int max, int diff ); // calculates the difference and then creates width and height
+void xx_calculate_bar  ( xx_bar* i_bar, int diff ); // calculates the difference and then creates width and height
 
 void xx_show_bar ( xx_bar* i_bar, int value ); // will have 0 value on negative values and 1 on positive values
 void xx_set_bar_orientation ( xx_bar* i_bar, int is_set );
@@ -199,16 +199,18 @@ void xx_set_bar ( xx_bar* i_bar, float x, float y ) {
 }
 
 /* 
- * function - void xx_calculate_bar ( xx_bar* i_bar, int max, int diff )
+ * function - void xx_calculate_bar ( xx_bar* i_bar, int diff )
  *  -- calculates the width or height (according to i_bar -> is_vertical)
  * */
-void xx_calculate_bar ( xx_bar* i_bar, int max, int diff ) {
-  int r = diff - max;
+void xx_calculate_bar ( xx_bar* i_bar, int diff ) {
+  //int r = diff - max;
   if ( i_bar -> is_vertical ) { // if the setting is vertical
     i_bar -> bar_size -> w = 5.0f;
-    i_bar -> bar_size -> h = (float) (max - r);
+    //i_bar -> bar_size -> h = (float) (max - diff);
+    i_bar -> bar_size -> h = (float) (i_bar -> Screen_Height - diff);
   } else {
-    i_bar -> bar_size -> w = (float) (max - r);
+    //i_bar -> bar_size -> w = (float) (max - diff);
+    i_bar -> bar_size -> w = (float) (i_bar -> Screen_Width - diff);
     i_bar -> bar_size -> h = 5.0f;
   }
 }
