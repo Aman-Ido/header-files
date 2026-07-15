@@ -279,12 +279,12 @@ xx_button_text* xx_create_button_text ( bm_mgr* i_font, char* button_message ) {
   }
 
   // if input_message = "" then we will not allocate memory 
-  r_button -> button_text_size = xx_strlen (button_message);
+  /*r_button -> button_text_size = xx_strlen (button_message);
   r_button -> btn_text = (char*) calloc (r_button -> button_text_size, sizeof(char));
   if (r_button -> btn_text == NULL) {
     printf ("\t Error! Memory allocation, failed, xx_create_button::r_button -> btn_text, %d\n", r_button -> button_text_size);
     return NULL;
-  }
+  }*/
 
   r_button -> btn_size = (SDL_Rect*) malloc (sizeof(SDL_Rect) * 1);
   if (r_button -> btn_size == NULL) {
