@@ -1,6 +1,7 @@
 /* 
  * just a list nothing more than that
  * */
+// TODO: Please add reallocation or expanding of the list as we are working with it
 #define XX_LIST 0x01
 
 #ifndef XX_STRING 
