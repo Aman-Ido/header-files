@@ -1,0 +1,124 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>Header File Demo - HTML</title>
+    
+    <meta charset="UTF-8">
+    
+    <style>
+      .header {
+        font-weight: bold;
+      }
+      
+      .blue {
+        color: orange;
+      }
+      
+      body {
+        font-family: consolas;
+        color: grey;
+        background: black;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Here is the list of demo's with the header files</h1>
+    <i>Don't know how to make Bitmap Image ? click here <a href="https://aman-ido.github.io/">Bitmap Image Generator</a></i>
+    <table border=1>
+      <tr>
+        <th>S.No.</th>
+        <th>Header File</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>1.</td>
+        <td>
+          <ul>
+            <li>Header File (Github) : <br><a href="https://github.com/Aman-Ido/header-files/blob/main/src/Bitmap_Font_Manager.hpp"> - Bitmap_Font_Manager.hpp</a></li>
+            <li>Header in Use (Demo Code) : <br><a href="./demos/bitmap_rendering_demo1.html" target="_blank"> - bitmap_rendering_demo1.html</a></li>
+          </ul>
+        
+        </td>
+        <td>
+          <ul>
+            <li><font class="header">Single Header Class file, class named</font> - Bitmap_Font</li></li>
+            <li><font class="header">Necessary Libraries</font> - SDL_Image, SDL, cstring, cmath, iostream</li>
+            <li>
+              <font class="header">Methods - </font>
+              <ol>
+                <li>Bitmap_Font () - constructor</li>
+                <li>~Bitmap_Font () - destructor</li>
+                <li><font class="blue">void </font>free_image () - frees loaded texture</li>
+                <li><font class="blue">void </font>load_image ( <font class="blue">SDL_Renderer</font>* i_renderer, <font class="blue">std::string </font>path ) - loads the bitmap font image</li>
+                <li><font class="blue">void </font>update_format ( <font class="blue">std::string </font>i_input ) - updates the format like 16x6 or 16x16 (full ASCII table)</li>
+                <li><font class="blue">void </font>set_font_size ( <font class="blue"> int </font>i_font_size ) - sets the font size, should be corresponding to the width and height of characters</li>
+                <li><font class="blue">int </font>get_row ( <font class="blue">char</font> i_value ) - returns index row of that character ( no need to call )</li>
+                <li><font class="blue">int </font>get_col ( <font class="blue">char</font> i_value ) - returns index col of that character ( no need to call )</li>
+                <li><font class="blue">void </font>render_text ( <font class="blue">SDL_Renderer</font>* i_renderer, <font class="blue">int </font>x, <font class="blue">int </font>y, <font class="blue">std::string </font>i_text ) - renders the the text inputted in i_text</li>
+                <li><font class="blue">void </font>render_text_advanced ( <font class="blue">SDL_Renderer</font>* i_renderer, <font class="blue">int </font>x, <font class="blue">int </font>y, <font class="blue">std::string </font>i_text, <font class="blue">bool </font>i_animation ) - same as render_text but 
+                can format outputted text with characters like \n and \r</li>
+                <li><font class="blue">void </font>change_color ( <font class="blue">int </font>r, <font class="blue">int </font>g, <font class="blue">int </font>b ) - changes the color of the text (if the bitmap is in 'grey' or 'white' color results the best)</li>
+                </ol>
+            </li>
+            <li>
+              <font class="header">Members - </font>
+              <ol>
+                <li><font class="blue">SDL_Texture</font>* l_texture - for bitmap image texture</li>
+                <li><font class="blue">int </font>width - width of the image texture</li>
+                <li><font class="blue">int </font>height - height of the image texture</li>
+                <li><font class="blue">bool </font>is_full - format of bitmap image (16x16 / 16x6)</li>
+                <li><font class="blue">int </font>row - size of row, it changes depending of format - is_full</li>
+                <li><font class="blue">int </font>col - size of col, it does not change as per now</li>
+                <li><font class="blue">int </font>font_size - size of the font, remember if size of a character in your bitmap is 
+                24 this should be 24</li>
+                <li><font class="blue">int </font>col_switch - for the rendering_advanced text, switch for col ( no need to call )</li>
+                <li><font class="blue">int </font>row_switch - for the rendering_advanced text, switch for row ( no need to call )</li>
+                
+              </ol>
+            </li>
+          </ul>
+        </td>
+      </tr>
+      <tr>
+        <td>2.</td>
+        <td>
+          <ul>
+            <li>Header File (Github) : <br>
+            <a href="https://github.com/Aman-Ido/header-files/blob/main/src/WindowManager_class.hpp">- WindowManager_class.hpp</a></li>
+            <li>Header in Use (Demo Code) : <br>
+            <a href="./demos/using_window_manager.html" target="_blank">- using_window_manager.html</a>
+            </li>
+          </ul>
+        </td>
+        <td>
+          <ul>
+            <li><font class="header">Single Header class File, class Named - </font> WindowManager</li>
+            <li><font class="header">Necessary Libraries - </font>iostream, SDL</li>
+            <li>
+              <font class="header">Methods - </font>
+              <ol>
+                <li>~WindowManager () - Destructor </li>
+                <li><font class="blue">void </font>free_window_manager () - destroys renderer and window</li>
+                <li><font class="blue">bool </font>create_window_renderer () - creates window and renderer</li>
+                <li><font class="blue">void </font>set_width ( <font class="blue">int </font>i_width ) - sets the window's width, should be called before creating window and renderer</li>
+                <li><font class="blue">void </font>set_height ( <font class="blue">int </font>i_height ) - sets the window's height, should be called before creating window and renderer</li>
+                <li><font class="blue">void </font>set_window_title ( <font class="blue">std::string </font>i_window_title ) - sets the window title, should be called before creating window and renderer</li>
+              </ol>
+            </li>
+            <li>
+              <font class="header">Members - </font>
+              <ol>
+                <li><font class="blue">SDL_Window</font>* window - window ptr</li>
+                <li><font class="blue">SDL_Renderer</font>* renderer - renderer ptr</li>
+                <li><font class="blue">std::string </font>window_title - for window's title (default - "window-1")</li>
+                <li><font class="blue">int</font> width - for window's width (default: 640)</li>
+                <li><font class="blue">int</font> height - for window's height (default: 480)</li>
+              </ol>
+            </li>
+            <li><i>It is very simple, currently you cannot change the renderer type and window type, but in future it will be available</i></li>
+          </ul>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
